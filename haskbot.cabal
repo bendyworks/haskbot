@@ -1,0 +1,25 @@
+name:                haskbot
+version:             0.0.1
+synopsis:            A plugin-able chatbot for Slack
+-- description:         
+homepage:            https://github.com/bendyworks/haskbot
+license:             MIT
+license-file:        LICENSE
+author:              Chris Wilson and Jon Childress
+maintainer:          dev+jonplussed+twopoint718@bendyworks.com
+-- copyright:           
+category:            Web
+build-type:          Simple
+-- extra-source-files:  
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  -- exposed-modules:     
+  -- other-modules:       
+  -- other-extensions:    
+  build-depends:       base >=4.7 && <4.8,
+                       scotty == 0.9.1,
+                       aeson == 0.8.0.2,
+                       text == 1.2.0.3
