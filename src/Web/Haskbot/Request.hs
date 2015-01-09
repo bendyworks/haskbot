@@ -1,8 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Web.Haskbot.Request where
 
 import Web.Scotty.Trans
 
 import Control.Applicative ((<$>))
+import Network.HTTP.Types
 import qualified Data.Text.Lazy as LT
 
 data RequestError =
@@ -32,3 +35,9 @@ reqParam key = do
     case val of
       Just x -> return x
       _      -> raise $ MissingParam key
+
+successful :: RequestM ()
+successful = status status200 >> raw ""
+
+status422 :: Status
+status422 = mkStatus 422 "unprocessable entity"
