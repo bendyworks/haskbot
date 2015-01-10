@@ -1,12 +1,16 @@
-{-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, OverloadedStrings #-}
 
 module Web.Haskbot.Types where
 
-import Data.Aeson (ToJSON, (.=), object, toJSON)
+import Data.Aeson (ToJSON, Value (..), (.=), object, toJSON)
 import Data.Monoid ((<>))
+import Network.URI (URI)
 import Web.Scotty.Trans (Parsable)
 
 import qualified Data.Text as ST
+
+class Formatted a where
+  formatted :: a -> ST.Text
 
 -- outgoing integrations
 
@@ -37,7 +41,7 @@ data Outgoing = Outgoing
 
 data Incoming = Incoming
   { inc_channel  :: !ResponseAddr
-  , inc_text     :: !ST.Text
+  , inc_text     :: !SlackText
   } deriving (Eq, Show)
 
 instance ToJSON Incoming where
@@ -52,6 +56,26 @@ data ResponseAddr = DirectMsg !UserName
 instance ToJSON ResponseAddr where
   toJSON (DirectMsg d) = toJSON d
   toJSON (Channel c)   = toJSON c
+
+data SlackText =
+    Plain ST.Text SlackText
+  | URL URI SlackText
+  | Link URI ST.Text SlackText
+  | End
+  deriving (Eq, Show)
+
+instance Formatted SlackText where
+  formatted slackText = case slackText of
+    (Plain text next) ->
+      text <> formatted next
+    (URL uri next) ->
+      "<" <> ST.pack (show uri) <> ">" <> formatted next
+    (Link uri text next) ->
+      "<" <> ST.pack (show uri) <> "|" <> text <> ">" <> formatted next
+    End -> ""
+
+instance ToJSON SlackText where
+  toJSON slackText = String $ formatted slackText
 
 --data Incoming = Incoming
 --  { inc_channel  :: !ResponseAddr
@@ -116,9 +140,6 @@ newtype UserName    = UserName ST.Text    deriving (Eq, Show, ToJSON, Parsable)
 newtype Command     = Command ST.Text     deriving (Eq, Show, ToJSON, Parsable)
 newtype HexCode     = HexCode ST.Text     deriving (Eq, Show, ToJSON, Parsable)
 newtype Emoji       = Emoji ST.Text       deriving (Eq, Show, ToJSON, Parsable)
-
-class Formatted a where
-  formatted :: a -> ST.Text
 
 instance Formatted ChannelName where
   formatted (ChannelName x) = "#" <> x

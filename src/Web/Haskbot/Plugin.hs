@@ -1,5 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveFunctor, OverloadedStrings #-}
 
 module Web.Haskbot.Plugin where
 
